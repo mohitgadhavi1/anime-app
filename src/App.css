@@ -4,10 +4,22 @@
   text-align: center;
   margin: 0;
   padding: 0;
+  background-color: #E7F6F2;
 }
 
+h1,h2,h3,h4,h5,h6,p{
+  color: #2C3333;
+  margin: 0;
+  padding: 0;
+}
 
-
+button{
+  background: #A5C9CA;
+  cursor: pointer;
+  border: .5px solid #395B64;
+  border-radius: 8px;
+ 
+}
 
 
 

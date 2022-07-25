@@ -1,15 +1,10 @@
-import React, { useState } from "react";
-import logo from "./logo.svg";
-import { Counter } from "./features/counter/Counter";
-import Watchlist from "./features/Watchlist/Watchlist";
+import Home from "./features/home/Home";
 import "./App.css";
 
 function App() {
-  
-
   return (
     <div className="App">
-      <Watchlist />
+      <Home />
     </div>
   );
 }

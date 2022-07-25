@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "./Watchlist.css";
-function Watchlist() {
+import "./Home.css";
+const Home = () => {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState([]);
@@ -38,6 +38,11 @@ function Watchlist() {
     };
     fetchData();
   }, []);
+
+  let items = JSON.parse(localStorage.getItem("watchList"));
+  useEffect(() => {
+    setWatchList(JSON.parse(localStorage.getItem("watchList")) || []);
+  }, [localStorage]);
 
   //   console.log(data);
 
@@ -78,54 +83,51 @@ function Watchlist() {
 
     setFilterData(tempFilterData);
   };
-  const localWatchList = [];
 
-  if (watchList) {
-    watchList.map((item) => {
-      localWatchList.push(item);
-      localStorage.setItem("watchList", JSON.stringify(localWatchList));
-    });
-  } else {
-    setWatchList(() => {
-      localStorage.getItem("watchList");
-    });
-  }
+  console.log(watchList);
 
-  const localObj = localStorage.getItem("watchList");
-  console.log(localObj);
-  //   console.log(watchList);
+  console.log(items);
 
   return (
     <>
       <header>
         <h1>Anime World </h1>
-        <div>
+        <div className="search-wrap">
           <input
+            className="searchbar"
             type="text"
             value={query}
             onChange={(e) => {
+              e.preventDefault();
               setQuery(e.target.value.toLowerCase());
             }}
-            placeholder="search your movie"
+            placeholder="   What are you looking for?"
           />
         </div>
-        <button onClick={() => setIsWatchListOpen(!isWatchListOpen)}>
-          WatchList({watchList.length})
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setIsWatchListOpen(!isWatchListOpen);
+          }}
+        >
+          {" "}
+          {isWatchListOpen ? "Close" : `WatchList(${watchList.length})`}
         </button>
       </header>
       <section className="filter-section">
-        <p>Filter: </p>
-        {genre.map((item) => {
-          return (
-            <button
-              key={genre.indexOf(item)}
-              value={item}
-              onClick={handleFilter}
-            >
-              {item}
-            </button>
-          );
-        })}
+        <p style={{ color: "#A5C9CA" }}>Filter: </p>
+        {!isWatchListOpen &&
+          genre.map((item) => {
+            return (
+              <button
+                key={genre.indexOf(item)}
+                value={item}
+                onClick={handleFilter}
+              >
+                {item}
+              </button>
+            );
+          })}
       </section>
       <section className="movie-section">
         {isLoading && <p className="loading-message">Movies on the Way....</p>}
@@ -137,14 +139,47 @@ function Watchlist() {
                   <img src={item.image} alt="img" />
                   <h4> {item.title} </h4>
                   <p>Popularity:{item.popularity || "No Data Found"} </p>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setWatchList((watchList) => [...watchList, item]);
-                    }}
-                  >
-                    Add to Wishlist
-                  </button>
+                  {isWatchListOpen ? (
+                    <button
+                      value={item.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        console.log(e.target.value);
+
+                        for (let i = 0; i < items.length; i++) {
+                          // console.log(items[i]);
+                          if (items[i].id == e.target.value) {
+                            console.log(items[i]);
+                            items.splice(i, 1);
+                            console.log(items);
+                          }
+                        }
+                        let newItems = JSON.stringify(items);
+                        localStorage.setItem("watchList", newItems);
+                        setWatchList(
+                          JSON.parse(localStorage.getItem("watchList")) || []
+                        );
+                        //Restoring object left into items again
+                      }}
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!watchList.includes(item)) {
+                          setWatchList((watchList) => [...watchList, item]);
+                          localStorage.setItem(
+                            "watchList",
+                            JSON.stringify([...watchList, item])
+                          );
+                        }
+                      }}
+                    >
+                      Add to Wishlist
+                    </button>
+                  )}
                 </div>
               );
             }
@@ -152,6 +187,6 @@ function Watchlist() {
       </section>
     </>
   );
-}
+};
 
-export default Watchlist;
+export default Home;

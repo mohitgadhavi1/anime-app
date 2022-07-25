@@ -13,6 +13,7 @@ header{
     border-top: 1px solid rgb(234, 234, 234);
     border-bottom: 1px solid rgb(234, 234, 234);
     margin-bottom: 1%;
+    background-color: #395B64;
 }
 .movie-section{
     display: grid;
@@ -28,8 +29,26 @@ header{
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background-color: antiquewhite;
+    background-color:#A5C9CA;
    cursor: pointer;
     border: 1px solid black;
+    height: 50vh;
 }
 img {max-width:100%; height:50%}
+
+.search-wrap{
+
+}
+.searchbar{
+    width: 300px;
+    background-color: azure;
+    border-radius: 8px;
+    border: 0.5px solid #395B64;
+    height: 20px;
+}
+.loading-message{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
