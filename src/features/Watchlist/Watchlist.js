@@ -5,56 +5,65 @@ function Watchlist() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState([]);
   const [filterData, setFilterData] = useState(null);
+  const [watchList, setWatchList] = useState([]);
+  const [isWatchListOpen, setIsWatchListOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = async () => {
-    await fetch("https://api.jikan.moe/v4/anime")
-      .then((response) => {
-        return response.json();
-      })
-      .then((item) => {
-        const tempData = item.data;
-        setData(
-          tempData.map((item) => {
-            return {
-              id: item.mal_id,
-              title: item.title,
-              image: item.images.jpg.image_url,
-              popularity: item.popularity,
-              genre: item.genres.map((item) => {
-                return item.name;
-              }),
-            };
-          })
-        );
-      });
-  };
-
+  //Fetch Data from given api
+  //call the fetch func in useState for single initial render
   useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      await fetch("https://api.jikan.moe/v4/anime")
+        .then((response) => {
+          return response.json();
+        })
+        .then((item) => {
+          setIsLoading(false);
+          const tempData = item.data;
+          setData(
+            tempData.map((item) => {
+              return {
+                id: item.mal_id,
+                title: item.title,
+                image: item.images.jpg.image_url,
+                popularity: item.popularity,
+                genre: item.genres.map((item) => {
+                  return item.name;
+                }),
+              };
+            })
+          );
+        });
+    };
     fetchData();
   }, []);
 
   //   console.log(data);
 
-  function getUniqueGenre() {
-    const genreData = [];
-
-    data.map((item) => {
-      item.genre.map((i) => {
-        genreData.push(i);
-      });
-    });
-    let uniqGenre = [];
-    for (let i = 0; i < genreData.length; i++) {
-      if (uniqGenre.indexOf(genreData[i]) === -1) {
-        uniqGenre.push(genreData[i]);
-      }
-    }
-    setGenre(uniqGenre);
-  }
-
+  //func for filter genre data
+  // func call into useState and gave dependency of data.
   useEffect(() => {
+    function getUniqueGenre() {
+      const genreData = [];
+
+      data.map((item) => {
+        item.genre.map((i) => {
+          genreData.push(i);
+        });
+      });
+      let uniqGenre = [];
+      for (let i = 0; i < genreData.length; i++) {
+        if (uniqGenre.indexOf(genreData[i]) === -1) {
+          uniqGenre.push(genreData[i]);
+        }
+      }
+      setGenre(uniqGenre);
+    }
     getUniqueGenre();
   }, [data]);
+
+  // click event for selected genre
 
   const handleFilter = (e) => {
     e.preventDefault();
@@ -69,7 +78,22 @@ function Watchlist() {
 
     setFilterData(tempFilterData);
   };
- 
+  const localWatchList = [];
+
+  if (watchList) {
+    watchList.map((item) => {
+      localWatchList.push(item);
+      localStorage.setItem("watchList", JSON.stringify(localWatchList));
+    });
+  } else {
+    setWatchList(() => {
+      localStorage.getItem("watchList");
+    });
+  }
+
+  const localObj = localStorage.getItem("watchList");
+  console.log(localObj);
+  //   console.log(watchList);
 
   return (
     <>
@@ -80,13 +104,14 @@ function Watchlist() {
             type="text"
             value={query}
             onChange={(e) => {
-              setQuery(e.target.value);
+              setQuery(e.target.value.toLowerCase());
             }}
             placeholder="search your movie"
           />
-          <button>search</button>
         </div>
-        <button>WatchList</button>
+        <button onClick={() => setIsWatchListOpen(!isWatchListOpen)}>
+          WatchList({watchList.length})
+        </button>
       </header>
       <section className="filter-section">
         <p>Filter: </p>
@@ -103,17 +128,27 @@ function Watchlist() {
         })}
       </section>
       <section className="movie-section">
-        {(filterData || data).map((item) => {
-          //   if (item.title.toLowerCase() == query.toLowerCase())
-          return (
-            <div className="movie" key={item.id}>
-              <img src={item.image} alt="img" />
-              <h4> {item.title} </h4>
-              <p>Popularity:{item.popularity || "No Data Found"} </p>
-              <button>Add to Wishlist</button>
-            </div>
-          );
-        })}
+        {isLoading && <p className="loading-message">Movies on the Way....</p>}
+        {!isLoading &&
+          ((isWatchListOpen && watchList) || filterData || data).map((item) => {
+            if (item.title.toLowerCase().includes(query)) {
+              return (
+                <div className="movie" key={item.id}>
+                  <img src={item.image} alt="img" />
+                  <h4> {item.title} </h4>
+                  <p>Popularity:{item.popularity || "No Data Found"} </p>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setWatchList((watchList) => [...watchList, item]);
+                    }}
+                  >
+                    Add to Wishlist
+                  </button>
+                </div>
+              );
+            }
+          })}
       </section>
     </>
   );
